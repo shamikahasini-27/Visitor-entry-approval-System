@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAES · Visitor Approval Entry System</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+  AUTH SCREEN
+═══════════════════════════════════════ -->
+<div class="screen active" id="s-auth">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <h1>Visitor Approval Entry System</h1>
+      <p> Security Systems Domain</p>
+    </div>
+
+    <!-- Portal Selector -->
+    <div class="portal-choice" id="portal-choice">
+      <div class="portal-pill t-pill selected" onclick="selectPortal('tenant',this)">
+        <div class="pp-icon">🏠</div>
+        <div class="pp-title" style="color:var(--tenant)">Tenant / Owner</div>
+        <div class="pp-desc">Manage visitor approvals, pre-approve guests and schedule entries.</div>
+      </div>
+      <div class="portal-pill g-pill" onclick="selectPortal('guard',this)">
+        <div class="pp-icon">🛡️</div>
+        <div class="pp-title" style="color:var(--guard)">Security Guard</div>
+        <div class="pp-desc">Register visitors, send approval requests to tenants, and manage gate access logs.</div>
+      </div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="a-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="a-tab" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="form-section active" id="fs-login">
+        <div class="fg">
+          <label>Email Address</label>
+          <input type="email" id="l-email" placeholder="you@email.com">
+          <div class="ferr" id="l-email-err">Enter a valid email</div>
+        </div>
+        <div class="fg">
+          <label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="l-pw" placeholder="••••••••">
+            <button class="pw-eye" onclick="eyeToggle('l-pw',this)">👁</button>
+          </div>
+          <div class="ferr" id="l-pw-err">Password required</div>
+        </div>
+        <button class="sbtn sbtn-t" id="l-btn" onclick="doLogin()">Sign In</button>
+      </div>
+
+      <!-- SIGNUP TENANT -->
+      <div class="form-section" id="fs-signup-tenant">
+        <div class="fg-row">
+          <div class="fg">
+            <label>Full Name</label>
+            <input type="text" id="st-name" placeholder="Your full name">
+            <div class="ferr" id="st-name-err">Required</div>
+          </div>
+          <div class="fg">
+            <label>Phone</label>
+            <input type="tel" id="st-phone" placeholder="+91 00000 00000">
+          </div>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Block</label>
+            <input type="text" id="st-block" placeholder="e.g. A, B, C">
+            <div class="ferr" id="st-block-err">Required</div>
+          </div>
+          <div class="fg">
+            <label>Flat Number</label>
+            <input type="text" id="st-flat" placeholder="e.g. 304">
+            <div class="ferr" id="st-flat-err">Required</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Tenant Email</label>
+          <input type="email" id="st-email" placeholder="your@email.com">
+          <div class="ferr" id="st-email-err">Enter a valid email</div>
+        </div>
+        <div class="fg">
+          <label>Flat Code <span style="color:var(--muted)">(given by management)</span></label>
+          <input type="text" id="st-code" placeholder="e.g. flat-001" style="font-family:'JetBrains Mono',monospace;letter-spacing:1px">
+          <div class="ferr" id="st-code-err">Enter the code given by management</div>
+          <div class="hint">This code is provided by your society management office.</div>
+        </div>
+        <div class="fg">
+          <label>Set Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="st-pw" placeholder="Min. 8 characters">
+            <button class="pw-eye" onclick="eyeToggle('st-pw',this)">👁</button>
+          </div>
+          <div class="ferr" id="st-pw-err">Min 8 characters</div>
+        </div>
+        <button class="sbtn sbtn-t" onclick="doSignupTenant()">Create Tenant Account</button>
+      </div>
+
+      <!-- SIGNUP GUARD -->
+      <div class="form-section" id="fs-signup-guard">
+        <div class="fg">
+          <label>Full Name</label>
+          <input type="text" id="sg-name" placeholder="Your full name">
+          <div class="ferr" id="sg-name-err">Required</div>
+        </div>
+        <div class="fg">
+          <label>Security Email</label>
+          <input type="email" id="sg-email" placeholder="security@email.com">
+          <div class="ferr" id="sg-email-err">Enter a valid email</div>
+        </div>
+        <div class="fg">
+          <label>Security Code <span style="color:var(--muted)">(given by management)</span></label>
+          <input type="text" id="sg-code" placeholder="e.g. sec-001" style="font-family:'JetBrains Mono',monospace;letter-spacing:1px">
+          <div class="ferr" id="sg-code-err">Enter the security code from management</div>
+          <div class="hint">This code is provided by the security management office.</div>
+        </div>
+        <div class="fg">
+          <label>Set Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="sg-pw" placeholder="Min. 8 characters">
+            <button class="pw-eye" onclick="eyeToggle('sg-pw',this)">👁</button>
+          </div>
+          <div class="ferr" id="sg-pw-err">Min 8 characters</div>
+        </div>
+        <button class="sbtn sbtn-g" onclick="doSignupGuard()">Create Security Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  SECURITY DASHBOARD
+═══════════════════════════════════════ -->
+<div class="screen" id="s-security">
+  <nav class="dash-nav">
+    <div class="dash-nav-left">
+      <span class="nav-logo">VAES</span>
+      <span class="nav-badge nb-g">🛡️ Security Guard</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="guard-nav-name"></span>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+  <div class="dash-body">
+    <div class="stats-row">
+      <div class="stat-c"><div class="stat-val blue" id="sg-stat-today">0</div><div class="stat-lbl">Today's Visitors</div></div>
+      <div class="stat-c"><div class="stat-val warn" id="sg-stat-pending">0</div><div class="stat-lbl">Pending Approval</div></div>
+      <div class="stat-c"><div class="stat-val" id="sg-stat-approved">0</div><div class="stat-lbl">Approved</div></div>
+      <div class="stat-c"><div class="stat-val red" id="sg-stat-denied">0</div><div class="stat-lbl">Denied</div></div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="d-tab active" onclick="secTab('register',this)">📝 Register Visitor</button>
+      <button class="d-tab" onclick="secTab('requests',this)">📋 Sent Requests</button>
+      <button class="d-tab" onclick="secTab('log',this)">🗂 Visit Log</button>
+    </div>
+
+    <!-- Register Visitor -->
+    <div class="dash-panel active" id="sp-register">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-blue">📝</div>New Visitor Registration</div>
+        </div>
+        <div class="fgrid">
+          <div class="fg">
+            <label>Visitor Full Name</label>
+            <input type="text" id="vr-name" placeholder="Full name of visitor">
+            <div class="ferr" id="vr-name-err">Required</div>
+          </div>
+          <div class="fg">
+            <label>Phone Number</label>
+            <input type="tel" id="vr-phone" placeholder="+91 00000 00000">
+            <div class="ferr" id="vr-phone-err">Required</div>
+          </div>
+          <div class="fg">
+            <label>Purpose of Visit</label>
+            <select id="vr-purpose">
+              <option value="">Select purpose</option>
+              <option>Personal Visit</option>
+              <option>Delivery</option>
+              <option>Maintenance / Repair</option>
+              <option>Official Work</option>
+              <option>Interview</option>
+              <option>Other</option>
+            </select>
+            <div class="ferr" id="vr-purpose-err">Required</div>
+          </div>
+          <div class="fg">
+            <label>Block</label>
+            <input type="text" id="vr-block" placeholder="e.g. A, B, C">
+            <div class="ferr" id="vr-block-err">Required</div>
+          </div>
+          <div class="fg full">
+            <label>Flat Number</label>
+            <input type="text" id="vr-flat" placeholder="e.g. 304">
+            <div class="ferr" id="vr-flat-err">Required</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary" onclick="sendApprovalRequest()">📨 Send Approval Request to Tenant</button>
+      </div>
+
+      <!-- Verify Absence Password -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-warn">🔑</div>Verify Absence Password</div>
+        </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;">Enter the flat number and the absence password set by the tenant to grant entry.</p>
+        <div class="fgrid" style="margin-bottom:.8rem;">
+          <div class="fg" style="margin:0">
+            <label>Block</label>
+            <input type="text" id="vpw-block" placeholder="e.g. A">
+          </div>
+          <div class="fg" style="margin:0">
+            <label>Flat No.</label>
+            <input type="text" id="vpw-flat" placeholder="e.g. 101">
+          </div>
+          <div class="fg full" style="margin:0">
+            <label>Absence Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="vpw-input" placeholder="Enter tenant's absence password">
+              <button class="pw-eye" onclick="eyeToggle('vpw-input',this)">👁</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-warn" onclick="verifyAbsencePw()">🔑 Verify &amp; Grant Access</button>
+        <div id="vpw-result" style="margin-top:.8rem;font-size:.82rem;display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Sent Requests -->
+    <div class="dash-panel" id="sp-requests">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-blue">📋</div>Approval Requests Sent</div>
+        </div>
+        <div id="guard-requests-list">
+          <div class="empty"><div class="empty-icon">📭</div><div class="empty-txt">No requests sent yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visit Log -->
+    <div class="dash-panel" id="sp-log">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-warn">🗂</div>Complete Visit Log</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Export</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Visitor</th>
+                <th>Block/Flat</th>
+                <th>Purpose</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Entry Via</th>
+              </tr>
+            </thead>
+            <tbody id="guard-log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  TENANT DASHBOARD
+═══════════════════════════════════════ -->
+<div class="screen" id="s-tenant">
+  <nav class="dash-nav">
+    <div class="dash-nav-left">
+      <span class="nav-logo">VAES</span>
+      <span class="nav-badge nb-t">🏠 Tenant Portal</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="tenant-nav-name"></span>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+  <div class="dash-body">
+    <div class="stats-row">
+      <div class="stat-c"><div class="stat-val blue" id="tn-stat-pending">0</div><div class="stat-lbl">Pending Approval<span class="notif-dot" id="tn-notif" style="display:none"></span></div></div>
+      <div class="stat-c"><div class="stat-val" id="tn-stat-approved">0</div><div class="stat-lbl">Approved Today</div></div>
+      <div class="stat-c"><div class="stat-val red" id="tn-stat-denied">0</div><div class="stat-lbl">Denied</div></div>
+      <div class="stat-c"><div class="stat-val warn" id="tn-stat-preapproved">0</div><div class="stat-lbl">Pre-Approved</div></div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="d-tab active" onclick="tenTab('approvals',this)">🔔 Approval Requests</button>
+      <button class="d-tab" onclick="tenTab('preapproval',this)">✅ Pre-Approvals</button>
+      <button class="d-tab" onclick="tenTab('log',this)">🗂 Visit Log</button>
+    </div>
+
+    <!-- Approval Requests -->
+    <div class="dash-panel active" id="tp-approvals">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-blue">🔔</div>Pending Visitor Approvals</div>
+        </div>
+        <div id="tenant-pending-list"></div>
+      </div>
+    </div>
+
+    <!-- Pre-Approvals -->
+    <div class="dash-panel" id="tp-preapproval">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-green">✅</div>Pre-Approved Visitors</div>
+          <button class="btn btn-success btn-sm" onclick="openModal('m-add-pa')">+ Add</button>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">Pre-approve specific people so they can enter without a manual approval each time.</p>
+        <div id="preapproval-list"></div>
+      </div>
+
+      <!-- Scheduled Guests -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-purple">📅</div>Scheduled Guests</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('m-add-schedule')">+ Schedule</button>
+        </div>
+        <div id="schedule-list"></div>
+      </div>
+
+      <!-- Absence Password -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-red">🔒</div>Absence Password</div>
+        </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;">Set a password that the security guard can use at the gate to grant entry to your pre-approved visitors when you are unreachable.</p>
+        <div class="fg" style="margin-bottom:1rem;">
+          <label>Set Absence Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="absence-pw" placeholder="Set a memorable password">
+            <button class="pw-eye" onclick="eyeToggle('absence-pw',this)">👁</button>
+          </div>
+        </div>
+        <div id="absence-pw-status" style="font-size:.78rem;margin-bottom:.8rem;display:none;"></div>
+        <button class="btn btn-warn" onclick="saveAbsencePw()">💾 Save Password</button>
+      </div>
+    </div>
+
+    <!-- Visit Log -->
+    <div class="dash-panel" id="tp-log">
+      <div class="card">
+        <div class="card-h">
+          <div class="card-title"><div class="ct-icon ci-warn">🗂</div>My Visitor Log</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Visitor</th>
+                <th>Purpose</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Entry Via</th>
+              </tr>
+            </thead>
+            <tbody id="tenant-log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  MODALS
+═══════════════════════════════════════ -->
+<!-- Add Pre-Approval -->
+<div class="modal-bg" id="m-add-pa" onclick="closeModalOut(event,'m-add-pa')">
+  <div class="modal">
+    <div class="modal-h">
+      <div class="modal-title">✅ Add Pre-Approved Visitor</div>
+      <button class="close-x" onclick="closeModal('m-add-pa')">✕</button>
+    </div>
+    <div class="modal-fgrid">
+      <div class="fg modal-fg">
+        <label>Full Name</label>
+        <input type="text" id="pa-name" placeholder="Visitor's name">
+        <div class="ferr" id="pa-name-err">Required</div>
+      </div>
+      <div class="fg modal-fg">
+        <label>Phone</label>
+        <input type="tel" id="pa-phone" placeholder="+91 00000 00000">
+      </div>
+      <div class="fg modal-fg">
+        <label>Relation / Role</label>
+        <input type="text" id="pa-relation" placeholder="e.g. Family, Maid, Driver">
+      </div>
+      <div class="fg modal-fg">
+        <label>Valid Until</label>
+        <input type="date" id="pa-until">
+      </div>
+      <div class="fg modal-fg full">
+        <label>Entry Schedule</label>
+        <select id="pa-schedule">
+          <option value="any">Any Time</option>
+          <option value="weekdays">Weekdays Only</option>
+          <option value="weekends">Weekends Only</option>
+          <option value="morning">Morning (6am–12pm)</option>
+          <option value="afternoon">Afternoon (12pm–6pm)</option>
+        </select>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <button class="sbtn sbtn-t" onclick="addPreApproval()">Save Pre-Approval</button>
+  </div>
+</div>
+
+<!-- Add Schedule -->
+<div class="modal-bg" id="m-add-schedule" onclick="closeModalOut(event,'m-add-schedule')">
+  <div class="modal">
+    <div class="modal-h"> 
+      <div class="modal-title">📅 Schedule a Guest</div>
+      <button class="close-x" onclick="closeModal('m-add-schedule')">✕</button>
+    </div>
+    <div class="modal-fgrid">
+      <div class="fg modal-fg">
+        <label>Guest Name</label>
+        <input type="text" id="sc-name" placeholder="Guest's name">
+        <div class="ferr" id="sc-name-err">Required</div>
+      </div>
+      <div class="fg modal-fg">
+        <label>Phone</label>
+        <input type="tel" id="sc-phone" placeholder="+91 00000 00000">
+      </div>
+      <div class="fg modal-fg">
+        <label>Visit Date</label>
+        <input type="date" id="sc-date">
+        <div class="ferr" id="sc-date-err">Required</div>
+      </div>
+      <div class="fg modal-fg">
+        <label>Visit Time</label>
+        <input type="time" id="sc-time">
+      </div>
+      <div class="fg modal-fg full">
+        <label>Purpose</label>
+        <input type="text" id="sc-purpose" placeholder="e.g. Birthday party, Business meeting">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <button class="sbtn sbtn-t" onclick="addSchedule()">Schedule Guest</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Done!</span>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
